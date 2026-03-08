@@ -41,5 +41,8 @@ fun todoDAOToModel(dao: TodoDAO) = Todo(
     cover = dao.cover,
     createdAt = dao.createdAt,
     updatedAt = dao.updatedAt
-).apply { urgency = dao.urgency }
+).apply { 
+    // Default urgency ke 1 (Low) jika 0 atau invalid
+    urgency = if (dao.urgency in 1..3) dao.urgency else 1 
+}
 
