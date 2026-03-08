@@ -7,58 +7,42 @@ import org.delcom.helpers.todoDAOToModel
 import org.delcom.tables.TodoTable
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.lowerCase
 import java.util.*
 
 class TodoRepository : ITodoRepository {
     override suspend fun getAll(userId: String, search: String, page: Int, perPage: Int, isComplete: Boolean?, urgency: Int?): List<Todo> = suspendTransaction {
-        var query = TodoDAO.find {
-            TodoTable.userId eq UUID.fromString(userId)
-        }
-
-        // Filter berdasarkan search (cari di title atau description)
+        val userId_uuid = UUID.fromString(userId)
+        var conditions = TodoTable.userId eq userId_uuid
+        
+        // Add search filter
         if (search.isNotBlank()) {
-            query = TodoDAO.find {
-                (TodoTable.userId eq UUID.fromString(userId)) and
+            conditions = conditions and
                 ((TodoTable.title.lowerCase() like "%${search.lowercase()}%") or
                  (TodoTable.description.lowerCase() like "%${search.lowercase()}%"))
-            }
         }
-
-        // Filter berdasarkan status completion (isComplete)
+        
+        // Add completion filter
         if (isComplete != null) {
-            query = TodoDAO.find {
-                (TodoTable.userId eq UUID.fromString(userId)) and
-                (TodoTable.isDone eq isComplete)
-            }
-            
-            // Terapkan search filter jika ada
-            if (search.isNotBlank()) {
-                query = query.filter {
-                    it.title.lowercase().contains(search.lowercase()) ||
-                    it.description.lowercase().contains(search.lowercase())
-                }.asFlow().toList().let { filteredTodos ->
-                    // Convert back to DAO to apply ordering
-                    filteredTodos.asSequence()
-                }
-            }
+            conditions = conditions and (TodoTable.isDone eq isComplete)
         }
-
-        // Filter berdasarkan urgency
+        
+        // Add urgency filter
         if (urgency != null && urgency in 1..3) {
-            query = TodoDAO.find {
-                (TodoTable.userId eq UUID.fromString(userId)) and
-                (TodoTable.urgency eq urgency)
-            }
+            conditions = conditions and (TodoTable.urgency eq urgency)
         }
-
-        // Terapkan ordering
+        
+        // Execute query with ordering and pagination
         val offset = (page - 1) * perPage
         
-        query.orderBy(TodoTable.createdAt to SortOrder.DESC)
-            .limit(perPage, offset.toLong())
+        TodoDAO.find(conditions)
+            .orderBy(TodoTable.createdAt to SortOrder.DESC)
+            .limit(perPage)
+            .offset(offset.toLong())
             .map(::todoDAOToModel)
     }
 
