@@ -181,6 +181,11 @@ class TodoService(
         validator.required("description", "Deskripsi tidak boleh kosong")
         validator.validate()
 
+        // Validasi urgency (1-3)
+        if (request.urgency !in 1..3) {
+            throw AppException(400, "Urgency harus antara 1-3 (1=Low, 2=Medium, 3=High)")
+        }
+
         // Tambahkan todo
         val todoId = todoRepo.create(
             request.toEntity()
@@ -211,6 +216,11 @@ class TodoService(
         validator.required("description", "Deskripsi tidak boleh kosong")
         validator.required("isDone", "Status selesai tidak boleh kosong")
         validator.validate()
+
+        // Validasi urgency (1-3)
+        if (request.urgency !in 1..3) {
+            throw AppException(400, "Urgency harus antara 1-3 (1=Low, 2=Medium, 3=High)")
+        }
 
         val oldTodo = todoRepo.getById(todoId)
         if (oldTodo == null || oldTodo.userId != user.id) {

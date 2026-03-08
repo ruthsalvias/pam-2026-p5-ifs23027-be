@@ -117,13 +117,55 @@ Content-Type: application/json
 ## Todos
 ### ---------------------------------------
 
-### Mengambil semua data todo user saat ini
+### Mengambil semua data todo user saat ini (DEFAULT - semua todos)
 # @name GetTodos
-GET {{BaseUrl}}/todos?search=
+GET {{BaseUrl}}/todos?page=1&perPage=10&search=
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
-### Menambahkan todo
+### Filter: Tampilkan hanya todo BELUM SELESAI
+# @name GetTodosBelumSelesai
+GET {{BaseUrl}}/todos?page=1&perPage=10&isDone=false
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Filter: Tampilkan hanya todo SELESAI
+# @name GetTodosSelesai
+GET {{BaseUrl}}/todos?page=1&perPage=10&isDone=true
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Filter: Urgency HIGH (3) - Todos dengan prioritas tinggi
+# @name GetTodosUrgencyHigh
+GET {{BaseUrl}}/todos?page=1&perPage=10&urgency=3
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Filter: Urgency MEDIUM (2)
+# @name GetTodosUrgencyMedium
+GET {{BaseUrl}}/todos?page=1&perPage=10&urgency=2
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Filter: Urgency LOW (1)
+# @name GetTodosUrgencyLow
+GET {{BaseUrl}}/todos?page=1&perPage=10&urgency=1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Filter: Combined - Belum selesai + HIGH priority
+# @name GetTodosIncompletHighPriority
+GET {{BaseUrl}}/todos?page=1&perPage=10&isDone=false&urgency=3
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Filter: Combined - Search + Status filter
+# @name GetTodosSearchFilter
+GET {{BaseUrl}}/todos?page=1&perPage=10&search=kotlin&isDone=false
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Menambahkan todo (Default urgency = 1/Low)
 # @name PostTodos
 POST {{BaseUrl}}/todos
 Authorization: Bearer {{authToken}}
@@ -131,7 +173,8 @@ Content-Type: application/json
 
 {
   "title": "Judul Todo",
-  "description": "Deskripsi Todo"
+  "description": "Deskripsi Todo",
+  "urgency": 1
 }
 
 > {%
@@ -144,16 +187,54 @@ GET {{BaseUrl}}/todos/{{todoId}}
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
-### Mengubah todo
+### Mengubah todo (dengan urgency)
 # @name PutTodo
 PUT {{BaseUrl}}/todos/{{todoId}}
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "title": "Judul Todo",
-  "description": "Deskripsi Todo",
-  "isDone": true
+  "title": "Judul Todo Updated",
+  "description": "Deskripsi Todo Updated",
+  "isDone": true,
+  "urgency": 2
+}
+
+### Menambahkan todo HIGH priority
+# @name PostTodosHighPriority
+POST {{BaseUrl}}/todos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Task Urgent",
+  "description": "Ini adalah task dengan prioritas tinggi",
+  "urgency": 3
+}
+
+### Menambahkan todo MEDIUM priority
+# @name PostTodosMediumPriority
+POST {{BaseUrl}}/todos
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Task Normal",
+  "description": "Ini adalah task dengan prioritas normal",
+  "urgency": 2
+}
+
+### Mengubah todo menjadi HIGH priority
+# @name PutTodoHighPriority
+PUT {{BaseUrl}}/todos/{{todoId}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Updated High Priority",
+  "description": "Diubah menjadi prioritas tinggi",
+  "isDone": false,
+  "urgency": 3
 }
 
 ### Mengubah cover todo
