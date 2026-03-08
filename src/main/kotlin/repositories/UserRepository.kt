@@ -31,6 +31,8 @@ class UserRepository : IUserRepository {
             name = user.name
             username = user.username
             password = user.password
+            photo = user.photo
+            about = user.about
             createdAt = user.createdAt
             updatedAt = user.updatedAt
         }
@@ -49,6 +51,7 @@ class UserRepository : IUserRepository {
             userDAO.username = newUser.username
             userDAO.password = newUser.password
             userDAO.photo = newUser.photo
+            userDAO.about = newUser.about
             userDAO.updatedAt = newUser.updatedAt
             true
         } else {

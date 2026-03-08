@@ -19,6 +19,7 @@ fun userDAOToModel(dao: UserDAO) = User(
     dao.username,
     dao.password,
     dao.photo,
+    dao.about,
     dao.createdAt,
     dao.updatedAt
 )

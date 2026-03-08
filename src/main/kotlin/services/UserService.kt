@@ -38,6 +38,8 @@ class UserService(
                     id = user.id,
                     name = user.name,
                     username = user.username,
+                    photo = user.photo,
+                    about = user.about,
                     createdAt = user.createdAt,
                     updatedAt = user.updatedAt,
                 ),
@@ -70,6 +72,7 @@ class UserService(
 
         user.username = request.username
         user.name = request.name
+        user.about = request.about
         val isUpdated = userRepo.update(
             user.id,
             user

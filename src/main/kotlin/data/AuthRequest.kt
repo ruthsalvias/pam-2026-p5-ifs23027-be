@@ -10,6 +10,7 @@ data class AuthRequest(
     var username: String = "",
     var password: String = "",
     var newPassword: String = "",
+    var about: String? = null,
 ){
     fun toMap(): Map<String, Any?> {
         return mapOf(
@@ -17,6 +18,7 @@ data class AuthRequest(
             "username" to username,
             "password" to password,
             "newPassword" to newPassword,
+            "about" to about,
         )
     }
 
