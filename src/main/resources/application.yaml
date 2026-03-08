@@ -1,0 +1,17 @@
+ktor:
+  application:
+    modules:
+      - org.delcom.ApplicationKt.module
+  deployment:
+    port: ${APP_PORT:8000}
+    host: ${APP_HOST:localhost}
+
+  database:
+    host: ${DB_HOST:127.0.0.1}
+    port: ${DB_PORT:5432}
+    name: ${DB_NAME:db_p5_pam}
+    user: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  jwt:
+    secret: "${JWT_SECRET:your-secret-key}"
