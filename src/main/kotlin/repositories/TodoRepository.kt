@@ -14,12 +14,51 @@ import java.util.*
 
 class TodoRepository : ITodoRepository {
     override suspend fun getAll(userId: String, search: String, page: Int, perPage: Int, isComplete: Boolean?, urgency: Int?): List<Todo> = suspendTransaction {
-        // DEBUG: semua filter dimatikan sementara, hanya filter userId
-        val query = TodoDAO.find {
+        var query = TodoDAO.find {
             TodoTable.userId eq UUID.fromString(userId)
         }
 
+        // Filter berdasarkan search (cari di title atau description)
+        if (search.isNotBlank()) {
+            query = TodoDAO.find {
+                (TodoTable.userId eq UUID.fromString(userId)) and
+                ((TodoTable.title.lowerCase() like "%${search.lowercase()}%") or
+                 (TodoTable.description.lowerCase() like "%${search.lowercase()}%"))
+            }
+        }
+
+        // Filter berdasarkan status completion (isComplete)
+        if (isComplete != null) {
+            query = TodoDAO.find {
+                (TodoTable.userId eq UUID.fromString(userId)) and
+                (TodoTable.isDone eq isComplete)
+            }
+            
+            // Terapkan search filter jika ada
+            if (search.isNotBlank()) {
+                query = query.filter {
+                    it.title.lowercase().contains(search.lowercase()) ||
+                    it.description.lowercase().contains(search.lowercase())
+                }.asFlow().toList().let { filteredTodos ->
+                    // Convert back to DAO to apply ordering
+                    filteredTodos.asSequence()
+                }
+            }
+        }
+
+        // Filter berdasarkan urgency
+        if (urgency != null && urgency in 1..3) {
+            query = TodoDAO.find {
+                (TodoTable.userId eq UUID.fromString(userId)) and
+                (TodoTable.urgency eq urgency)
+            }
+        }
+
+        // Terapkan ordering
+        val offset = (page - 1) * perPage
+        
         query.orderBy(TodoTable.createdAt to SortOrder.DESC)
+            .limit(perPage, offset.toLong())
             .map(::todoDAOToModel)
     }
 

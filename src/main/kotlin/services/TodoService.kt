@@ -33,18 +33,16 @@ class TodoService(
         // Ambil query parameter untuk pagination & filter
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val perPage = call.request.queryParameters["perPage"]?.toIntOrNull() ?: 10
-        val filter = call.request.queryParameters["filter"] // nilainya bisa: "complete" atau "active"
+        
+        // Ambil isDone parameter (bisa null, atau string "true"/"false")
+        val isDoneStr = call.request.queryParameters["isDone"]
+        val isDone = isDoneStr?.toBooleanStrictOrNull() // Konversi string "true"/"false" ke Boolean, null jika tidak ada
+        
         val urgencyStr = call.request.queryParameters["urgency"]
         val urgencyInt = urgencyStr?.toIntOrNull() // 1, 2, atau 3
 
-        val isComplete = when(filter) {
-            "complete" -> true
-            "active" -> false
-            else -> null // jika "all" atau kosong
-        }
-
-        // Panggil fungsi getAll yang baru
-        val todos = todoRepo.getAll(user.id, search, page, perPage, isComplete, urgencyInt)
+        // Panggil fungsi getAll dengan parameter isDone (Boolean?)
+        val todos = todoRepo.getAll(user.id, search, page, perPage, isDone, urgencyInt)
 
         val response = DataResponse(
             "success",
